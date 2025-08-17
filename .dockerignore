@@ -1,16 +1,13 @@
-/.github
-/.idea
+node_modules
+npm-debug.log
+Dockerfile*
+docker-compose*.yml
 .git
-/**/.env
 .gitignore
-*.txt
-/.build
-/.cache
-/.vscode
-/**/node_modules
-
-# Runtime and non-production folders
-/coverage
-/dist
-/fdm-monster
-/media
+.vscode
+.cursor-server
+*.swp
+.env
+mongodb-data
+mongoconfig
+fdm-monster/media

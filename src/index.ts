@@ -17,6 +17,8 @@ logger.log("✓ Parsed environment with (optional) .env file, created static log
 
 setupEnvConfig();
 
+console.log("<<< CUSTOM BUILD ACTIVE >>>");
+
 setupServer().then(({ httpServer, container }) => {
   container
     .resolve<ServerHost>(DITokens.serverHost)

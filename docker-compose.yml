@@ -1,82 +1,53 @@
 services:
+  octoprint1:
+    image: octoprint/octoprint:latest
+    container_name: octoprint1
+    ports:
+      - "5001:80"
+    volumes:
+      - octo1_data:/octoprint
+    networks: [stack]
+    restart: unless-stopped
+
+  octoprint2:
+    image: octoprint/octoprint:latest
+    container_name: octoprint2
+    ports:
+      - "5002:80"
+    volumes:
+      - octo2_data:/octoprint
+    networks: [stack]
+    restart: unless-stopped
+
   mongodb:
-    image: mongo:8
+    image: mongo:latest
     container_name: mongodb
+    restart: always
     environment:
-      # Authenticated variant, comment out for non-authenticated variant:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=fdm-root
-    ports:
-      - "21111:27017"
+      - MONGO_INITDB_ROOT_USERNAME=fdmmroot
+      - MONGO_INITDB_ROOT_PASSWORD=fdmmsecret
     volumes:
-      - ./fdm-monster:/data
-    restart: unless-stopped
+      - ./mongodb-data:/data/db
+      - ./mongoconfig:/data/configdb
+    networks: [stack]
 
-  # docker build --platform linux/amd64,linux/arm64 -t 1.5.0-alpha . -f .\docker\Dockerfile
   fdm-monster:
+    build: .
     container_name: fdm-monster
-    image: fdmmonster/fdm-monster:1.5.4
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
     restart: unless-stopped
-    deploy:
-      restart_policy:
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+    depends_on:
+      - mongodb
     ports:
       - "4000:4000"
     environment:
-      # Non-authenticated variant:
-#      - MONGO=mongodb://mongodb:27017/fdm-monster
-      # Authenticated variant:
-      - MONGO=mongodb://root:fdm-root@mongodb:27017/fdm-monster?authSource=admin
-      - NODE_ENV=development
-      - SERVER_PORT=4000
+      - MONGO=mongodb://fdmmroot:fdmmsecret@mongodb:27017/fdm-monster?authSource=admin
     volumes:
-      - ./fdm-monster/media/:/app/media
-
-  fdm-monster-sqlite:
-    container_name: fdm-monster-sqlite
-    image: fdmmonster/fdm-monster:1.9.0-sqlite # -arm64
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=development
-      - SERVER_PORT=4000
-      # These three variables are implicit to this docker image
-      # - ENABLE_EXPERIMENTAL_TYPEORM=true
-      # - DATABASE_PATH=./database
-      # - DATABASE_FILE=fdm-monster.sqlite
-    volumes:
-      - fdmm-media:/app/media
-      - fdmm-database:/app/database
-
-  fdm-monster-develop:
-    container_name: fdm-monster-develop
-    image: fdmmonster/fdm-monster:develop
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    restart: unless-stopped
-    deploy:
-      restart_policy:
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    ports:
-      - "4001:4001"
-    environment:
-      - NODE_ENV=development
-      - SERVER_PORT=4001
-    volumes:
-      - ./fdm-monster-alpha/media/:/app/media
-      - ./fdm-monster-alpha/database/:/app/database
+      - ./fdm-monster/media:/app/media
+    networks: [stack]
 
 volumes:
-  fdmm-media:
-    name: fdmm-media
-  fdmm-database:
-    name: fdmm-database
+  octo1_data:
+  octo2_data:
+
+networks:
+  stack:
