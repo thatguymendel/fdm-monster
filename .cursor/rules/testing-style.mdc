@@ -1,0 +1,33 @@
+---
+description: Testing conventions for our FDMM fork (Jest, SWC, Supertest)
+globs:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+  - "test/**/*.ts"
+alwaysApply: false
+---
+
+# Testing Style (FDMM fork)
+
+- Test runner: **Jest** with **@swc/jest** transform (already in devDependencies).
+- Structure:
+    - Unit tests near code or in `test/` (filename suffix `.test.ts`).
+    - Use Arrange–Act–Assert.
+    - Keep tests deterministic; avoid real network where possible.
+- API tests:
+    - Use **supertest** for HTTP endpoints.
+    - Assert on status codes and response shapes (use our API error envelope).
+- DB-related tests:
+    - Mongo: prefer **mongodb-memory-server** for isolated tests.
+    - Keep data builders/factories small and reusable.
+- Mocks:
+    - Mock external HTTP (e.g., OctoPrint) with **nock**.
+- Coverage:
+    - Focus on critical paths (services, routing logic, tag filtering).
+    - Avoid brittle snapshot tests except for stable UI components.
+- Naming:
+    - Files: `something.service.test.ts`, `printer.routes.test.ts`.
+    - `describe()` the unit under test; `it()` describes behavior.
+- CI friendliness:
+    - Don’t rely on local env files; inject via test setup.
+    - Clean up resources (servers, DB instances) after tests.

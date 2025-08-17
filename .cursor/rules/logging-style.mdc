@@ -1,0 +1,26 @@
+---
+description: Logging conventions for our FDMM fork (server + client)
+globs:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+alwaysApply: false
+---
+
+# Logging Style (FDMM fork)
+
+- Use the shared Logger service (e.g., `new Logger("ModuleName")`).
+- Create one logger per module/file with a clear category (e.g., "PrinterController", "TagService").
+- Prefer structured logs (objects) over string concatenation.
+- Include correlation where available:
+    - `requestId` for HTTP handlers (derive from header `x-request-id` or generate per request).
+    - `printerId`, `jobId`, `fileId` when relevant.
+- Levels:
+    - `INF` (info): lifecycle events (startup, successful operations).
+    - `DBG` (debug): detailed flow, decisions, filters, counts.
+    - `WRN` (warn): recoverable issues, validation failures, timeouts.
+    - `ERR` (error): exceptions, unexpected states.
+- HTTP handlers:
+    - Log route + method + latency on success at `DBG` or `INF`.
+    - On error: log `ERR` with `{ code, message }` and key context.
+- Avoid logging secrets: redact API keys, tokens, passwords.
+- Don’t spam logs in tight loops; summarize with counts or sample.
